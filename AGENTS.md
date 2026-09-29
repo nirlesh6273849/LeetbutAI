@@ -220,6 +220,20 @@ Hibernate is configured with `spring.jpa.hibernate.ddl-auto=validate`. All JPA e
 Current `contests` columns after V5–V9: `id`, `host_id`, `title`, `description`, `duration_minutes`, `status` (`DRAFT`, `ACTIVE`, `COMPLETED`), `allow_all`, `notify_everyone`, `scheduled_start`, `scheduled_end`, `started_at`, `ended_at`, `created_at`.
 Current `contest_problems` columns: `id`, `contest_id`, `problem_id`, `problem_order`, `points`.
 
+### Support Tickets (V10__add_support_tickets.sql)
+- **support_tickets**: user-raised support requests with subject, category (ACCOUNT, PROBLEMS, CONTESTS, OTHER), message, status (OPEN, IN_PROGRESS, RESOLVED, CLOSED), optional admin_response, and created/updated timestamps.
+- User endpoints: GET / POST /api/user/support/tickets; admin endpoints: GET /api/admin/support/tickets and PUT /api/admin/support/tickets/{id}.
+
+### Support Ticket Priority & Attachments (V11__add_support_ticket_priority_and_attachment.sql)
+- Users choose LOW, NORMAL, HIGH, or URGENT priority when creating a ticket and may attach one optional image, PDF, or plain-text file up to 5 MB.
+- Attachment content is stored in support_tickets and is available only to the ticket owner or an administrator through the authenticated attachment endpoints.
+- When SMTP delivery is configured, users receive an email confirmation when a ticket opens and an email whenever an administrator posts a new reply.
+
+### User Portal Chatbot
+- The floating **Ask NuCode** assistant is available throughout the standard user portal (not the assessment workspace). It sends requests to POST /api/user/chatbot.
+- ChatbotService calls the OpenAI-compatible ScaleMax chat-completions API using SCALEMAX_API_KEY server-side and defaults to model gpt-5.6-luna. SCALEMAX_API_URL and SCALEMAX_MODEL are optional environment overrides.
+- ProjectKnowledgeService provides only the signed-in user's profile/progress, recent submission metadata, own support-ticket metadata, certification progress, user-visible contests, and hosted/invited assessment summaries. Never pass hidden tests, source code, credentials, API keys, assessment invitation tokens, participant lists, or another user's data to the provider.
+
 ---
 
 ## 5. Complete REST API Specification
@@ -255,7 +269,7 @@ Current `contest_problems` columns: `id`, `contest_id`, `problem_id`, `problem_o
 | --- | --- | --- | --- | --- |
 | `GET` | `/api/admin/dashboard` | ADMIN | — | Aggregated stats: total users, problems, submissions |
 | `GET` | `/api/admin/users` | ADMIN | — | Lists non-admin users |
-| `DELETE` | `/api/admin/users/{id}` | ADMIN | — | Deletes user account (prevents self-deletion) |
+| `DELETE` | `/api/admin/users/{id}` | ADMIN | `{ reason }` | Deactivates and removes a non-admin account, cascades its practice data, and sends a deactivation email; the email may be registered again. |
 | `GET` | `/api/admin/submissions` | ADMIN | — | Global submission audit log |
 | `GET` | `/api/admin/hints?problemId={id}` | ADMIN | — | Gets hints for a problem |
 | `POST` | `/api/admin/hints` | ADMIN | `{ problemId, hintText }` | Creates new hint |
