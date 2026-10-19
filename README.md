@@ -17,6 +17,16 @@ for architecture, release steps, and operational guidance.
 See [`Pulse/README.md`](Pulse/README.md) for prerequisites, Docker Compose startup,
 local service ports, and database reset instructions.
 
+## AI problem generation
+
+The AI Problem Creator supports three flows:
+
+- **Generate Problem** sends the user's request directly to the configured AI provider to create a structured private draft.
+- **Generate According to My Skills** retrieves the signed-in user's accepted submissions, solved topic and difficulty counts, and the approved problem catalogue. That database context is supplied to the provider so it can recommend an existing problem or generate a new draft.
+- **Refine Problem** sends the current draft and a requested change back to the provider.
+
+The skills-based flow is a lightweight database-backed form of retrieval-augmented generation. The current implementation does not use embeddings, a vector database, or semantic similarity search.
+
 ## Repository notes
 
 - `Pulse/` is a Git submodule containing the application repository.
